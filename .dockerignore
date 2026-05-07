@@ -1,0 +1,23 @@
+# Exclude large/unnecessary files from build context
+.git
+.gitignore
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.swp
+.DS_Store
+
+# Data and outputs (mounted at runtime)
+data/
+outputs/
+server/state/
+
+# Notebooks and misc
+notebooks/
+*.ipynb
+
+# IDE and local configs
+.vscode/
+.idea/

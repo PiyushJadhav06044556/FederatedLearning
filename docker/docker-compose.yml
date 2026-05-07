@@ -1,0 +1,85 @@
+services:
+  server:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: federated-runtime:py311-slim
+    container_name: fl_server
+    working_dir: /app
+    command: python -m server.server
+    environment:
+      - CLIENTS_PER_ROUND=3
+      - DATA_PROCESSED=data/processed/train.csv
+      - STATE_DIR=server/state
+      - PORT=8000
+      - EVAL_TEST_CSV=data/processed/test.csv
+    ports:
+      - "8000:8000"
+    volumes:
+      - ..:/app
+
+  client1:
+    image: federated-runtime:py311-slim
+    pull_policy: never
+    container_name: fl_client1
+    working_dir: /app
+    command: python -m clients.client
+    environment:
+      - SERVER_URL=http://server:8000
+      - DATA_CSV=data/clients/client_1/train.csv
+      - CLIENT_ID=client1
+      - ROUNDS=5
+      - LOCAL_EPOCHS=1
+      - BATCH_SIZE=512
+      - LR=0.1
+      - REG=0.0
+      - SECAGG=1
+      - DELAY=0.0
+    depends_on:
+      - server
+    volumes:
+      - ..:/app
+
+  client2:
+    image: federated-runtime:py311-slim
+    pull_policy: never
+    container_name: fl_client2
+    working_dir: /app
+    command: python -m clients.client
+    environment:
+      - SERVER_URL=http://server:8000
+      - DATA_CSV=data/clients/client_2/train.csv
+      - CLIENT_ID=client2
+      - ROUNDS=5
+      - LOCAL_EPOCHS=1
+      - BATCH_SIZE=512
+      - LR=0.1
+      - REG=0.0
+      - SECAGG=1
+      - DELAY=0.2
+    depends_on:
+      - server
+    volumes:
+      - ..:/app
+
+  client3:
+    image: federated-runtime:py311-slim
+    pull_policy: never
+    container_name: fl_client3
+    working_dir: /app
+    command: python -m clients.client
+    environment:
+      - SERVER_URL=http://server:8000
+      - DATA_CSV=data/clients/client_3/train.csv
+      - CLIENT_ID=client3
+      - ROUNDS=5
+      - LOCAL_EPOCHS=1
+      - BATCH_SIZE=512
+      - LR=0.1
+      - REG=0.0
+      - SECAGG=1
+      - DELAY=0.4
+    depends_on:
+      - server
+    volumes:
+      - ..:/app

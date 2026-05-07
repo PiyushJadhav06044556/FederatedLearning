@@ -1,0 +1,5 @@
+metric,value
+avg_round_latency_s,4.817984
+avg_server_cpu_time_s,2.121551
+total_masked_bytes,3720
+avg_upload_bytes_per_client,248

@@ -1,0 +1,3 @@
+metric,centralized,federated_last_round
+AUC,0.980566,0.980355
+Precision,0.848485,0.848485
