@@ -50,11 +50,14 @@ class LogisticRegression:
         return 1 if self.predict_proba_row(x) >= threshold else 0
 
     def batch_iter(self, X: List[List[float]], y: List[int], batch_size: int, shuffle: bool = True) -> Iterable[Tuple[List[List[float]], List[int]]]:
+       # Create a list of indices to keep track of data points
         idx = list(range(len(X)))
+        # Randomly shuffle indices if shuffle is True
         if shuffle:
             self.rng.shuffle(idx)
         for start in range(0, len(X), batch_size):
             j = idx[start:start + batch_size]
+            # Yield the batch of features and corresponding labels
             yield [X[i] for i in j], [y[i] for i in j]
 
     def fit(self, X: List[List[float]], y: List[int], epochs: int = 5, batch_size: int = 64, verbose: bool = True) -> None:
