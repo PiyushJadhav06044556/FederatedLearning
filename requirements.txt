@@ -1,5 +1,8 @@
+# Web framework for building APIs and applications
 flask>=2.0.0
+# Library for making HTTP requests to server
 requests>=2.26.0
+# Tools for secure communication and encryption
 cryptography>=3.4.0
 jupyterlab>=3.0.0
 matplotlib>=3.4.0
