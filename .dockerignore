@@ -2,6 +2,8 @@
 .git
 .gitignore
 venv/
+
+# Python bytecode cache (compiled files)
 __pycache__/
 *.pyc
 *.pyo
