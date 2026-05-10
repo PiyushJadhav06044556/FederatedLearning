@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 """Bonawitz-style mask helpers"""
 from __future__ import annotations
 from typing import Dict, List, Tuple
@@ -8,6 +9,7 @@ from .hkdf_prg import hkdf_expand, prg_mask_vector
 
 
 def derive_pairwise_seed(my_sk, peer_pub_bytes: bytes, round_id: int, i: str, j: str) -> bytes:
+    # Generate a shared secret using own private key and peer's public key (Diffie-Hellman)
     ss = shared_secret(my_sk, peer_pub_bytes)
     info = f"round:{round_id}|i:{i}|j:{j}".encode()
     salt = b"secagg-hkdf"
@@ -16,8 +18,10 @@ def derive_pairwise_seed(my_sk, peer_pub_bytes: bytes, round_id: int, i: str, j:
 
 def make_mask_vector(my_kp: KeyPair, peers: Dict[str, bytes], round_id: int, dim: int, q: int, my_id: str) -> List[int]:
     """Sum signed pairwise masks; signs cancel across clients."""
+    # Initialize an accumulator vector of size 'dim' with zeros
     acc = [0] * dim
     for pid, ppub in peers.items():
+        # Skip generating a mask for ourselves
         if pid == my_id:
             continue
         if my_id < pid:
