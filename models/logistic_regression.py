@@ -172,3 +172,5 @@ if __name__ == "__main__":
     model = LogisticRegression(n_features=1, lr=0.5, reg=0.0, seed=1)
     model.fit(X, y, epochs=50, batch_size=2, verbose=False)
     print("Probas:", model.predict_proba(X))
+
+    # Need to add the Ui
