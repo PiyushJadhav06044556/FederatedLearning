@@ -107,7 +107,7 @@ class LogisticRegression:
 
     def predict_proba(self, X: List[List[float]]) -> List[float]:
         return [self.predict_proba_row(x) for x in X]
-
+ # Numerically stable sigmoid
     def get_params(self) -> Tuple[List[float], float]:
         return list(self.w), float(self.b)
 
@@ -139,7 +139,7 @@ class LogisticRegression:
         m.set_params(w, b)
         return m
 
-
+ # Numerically stable sigmoid
 def load_csv_xy(path: str, label_col: Optional[str] = None) -> Tuple[List[List[float]], List[int], List[str]]:
     X: List[List[float]] = []
     y: List[int] = []
