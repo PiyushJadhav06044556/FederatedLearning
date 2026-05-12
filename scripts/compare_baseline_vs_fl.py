@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 
 def read_centralized(path: Path):
     vals = {}
+    # Check if the file exists before attempting to open it
     if not path.exists():
         raise FileNotFoundError(f"Centralized metrics not found: {path}")
     with path.open("r", newline="") as f:
@@ -21,6 +22,7 @@ def read_fl_metrics(path: Path):
     rounds, aucs, precs = [], [], []
     if not path.exists():
         raise FileNotFoundError(f"Federated metrics log not found: {path}")
+        # Open and parse the CSV log file
     with path.open("r", newline="") as f:
         r = csv.DictReader(f)
         for row in r:
