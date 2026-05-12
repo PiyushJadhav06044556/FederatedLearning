@@ -3,18 +3,22 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
+      # Image name and tag for the server
     image: federated-runtime:py311-slim
     container_name: fl_server
     working_dir: /app
     command: python -m server.server
+    # Configuration via environment variables
     environment:
       - CLIENTS_PER_ROUND=3
       - DATA_PROCESSED=data/processed/train.csv
       - STATE_DIR=server/state
       - PORT=8000
       - EVAL_TEST_CSV=data/processed/test.csv
+      # Port mapping: Host Port 8000 to Container Port 8000
     ports:
       - "8000:8000"
+      # External storage or local folders mounted into the container
     volumes:
       - ..:/app
 
