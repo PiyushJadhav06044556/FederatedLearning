@@ -1,0 +1,2143 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>FedShield — Federated Fraud Detection Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ═══════════════════════════════════════════
+   RESET & ROOT
+═══════════════════════════════════════════ */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #020b18;
+        --bg2: #041426;
+        --bg3: #071e36;
+        --panel: #091f38;
+        --panel2: #0c2542;
+        --border: #0e3460;
+        --border2: #1a4a80;
+        --accent: #00d4ff;
+        --accent2: #0095c8;
+        --accent3: #00ffb3;
+        --gold: #f5c542;
+        --red: #ff4d6d;
+        --text: #e8f4fd;
+        --text2: #8bb8d4;
+        --text3: #4a7fa5;
+        --glow: 0 0 20px rgba(0, 212, 255, 0.3);
+        --glow2: 0 0 40px rgba(0, 212, 255, 0.15);
+        --font-head: "Syne", sans-serif;
+        --font-mono: "Space Mono", monospace;
+        --font-body: "DM Sans", sans-serif;
+        --r: 12px;
+        --r2: 8px;
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font-body);
+        min-height: 100vh;
+        overflow-x: hidden;
+        line-height: 1.6;
+      }
+
+      /* ═══════════════════════════════════════════
+   ANIMATED BACKGROUND GRID
+═══════════════════════════════════════════ */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image: linear-gradient(
+            rgba(0, 212, 255, 0.03) 1px,
+            transparent 1px
+          ),
+          linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+        background-size: 40px 40px;
+        pointer-events: none;
+        z-index: 0;
+        animation: gridMove 20s linear infinite;
+      }
+
+      @keyframes gridMove {
+        0% {
+          background-position: 0 0;
+        }
+        100% {
+          background-position: 40px 40px;
+        }
+      }
+
+      body::after {
+        content: "";
+        position: fixed;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(
+            ellipse at 30% 20%,
+            rgba(0, 100, 200, 0.08) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            ellipse at 70% 80%,
+            rgba(0, 212, 255, 0.05) 0%,
+            transparent 50%
+          );
+        pointer-events: none;
+        z-index: 0;
+        animation: bgPulse 8s ease-in-out infinite alternate;
+      }
+
+      @keyframes bgPulse {
+        0% {
+          opacity: 0.6;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+
+      /* ═══════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════ */
+      .container {
+        position: relative;
+        z-index: 1;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 24px 80px;
+      }
+
+      /* ═══════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════ */
+      header {
+        padding: 48px 0 40px;
+        text-align: center;
+        position: relative;
+      }
+
+      .logo-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(0, 212, 255, 0.08);
+        border: 1px solid rgba(0, 212, 255, 0.2);
+        border-radius: 100px;
+        padding: 6px 16px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--accent);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin-bottom: 24px;
+        animation: fadeDown 0.6s ease both;
+      }
+
+      .logo-badge .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--accent3);
+        box-shadow: 0 0 8px var(--accent3);
+        animation: blink 2s ease-in-out infinite;
+      }
+
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.3;
+        }
+      }
+
+      h1 {
+        font-family: var(--font-head);
+        font-size: clamp(32px, 5vw, 58px);
+        font-weight: 800;
+        line-height: 1.05;
+        letter-spacing: -0.02em;
+        background: linear-gradient(
+          135deg,
+          #ffffff 0%,
+          #a8d8ff 40%,
+          var(--accent) 70%,
+          var(--accent3) 100%
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: fadeDown 0.6s 0.1s ease both;
+        margin-bottom: 12px;
+      }
+
+      .subtitle {
+        font-size: 15px;
+        color: var(--text2);
+        font-weight: 300;
+        letter-spacing: 0.02em;
+        animation: fadeDown 0.6s 0.2s ease both;
+        margin-bottom: 32px;
+      }
+
+      .status-bar {
+        display: inline-flex;
+        align-items: center;
+        gap: 24px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 100px;
+        padding: 10px 24px;
+        animation: fadeDown 0.6s 0.3s ease both;
+      }
+
+      .status-item {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--text3);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        transition: var(--transition);
+      }
+
+      .status-item.active {
+        color: var(--accent3);
+      }
+      .status-item.active .status-dot {
+        background: var(--accent3);
+        box-shadow: 0 0 8px var(--accent3);
+      }
+
+      .status-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--text3);
+        transition: var(--transition);
+      }
+
+      @keyframes fadeDown {
+        from {
+          opacity: 0;
+          transform: translateY(-16px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* ═══════════════════════════════════════════
+   PIPELINE SECTION
+═══════════════════════════════════════════ */
+      .section-title {
+        font-family: var(--font-head);
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--text3);
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .section-title::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(90deg, var(--border), transparent);
+      }
+
+      .pipeline {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 16px;
+        margin-bottom: 32px;
+      }
+
+      /* ═══════════════════════════════════════════
+   STEP CARDS
+═══════════════════════════════════════════ */
+      .step-card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: var(--r);
+        padding: 24px;
+        position: relative;
+        overflow: hidden;
+        transition: var(--transition);
+        animation: fadeUp 0.6s ease both;
+        cursor: default;
+      }
+
+      .step-card:nth-child(1) {
+        animation-delay: 0.1s;
+      }
+      .step-card:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      .step-card:nth-child(3) {
+        animation-delay: 0.3s;
+      }
+      .step-card:nth-child(4) {
+        animation-delay: 0.4s;
+      }
+      .step-card:nth-child(5) {
+        animation-delay: 0.5s;
+      }
+
+      .step-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          135deg,
+          rgba(0, 212, 255, 0.04) 0%,
+          transparent 60%
+        );
+        pointer-events: none;
+      }
+
+      .step-card:hover {
+        border-color: var(--border2);
+        box-shadow: var(--glow2);
+        transform: translateY(-2px);
+      }
+
+      .step-card.completed {
+        border-color: rgba(0, 255, 179, 0.3);
+        background: rgba(0, 255, 179, 0.03);
+      }
+      .step-card.running {
+        border-color: rgba(0, 212, 255, 0.5);
+        box-shadow: var(--glow);
+      }
+      .step-card.error {
+        border-color: rgba(255, 77, 109, 0.4);
+      }
+
+      .step-number {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        color: var(--text3);
+        letter-spacing: 0.1em;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .step-badge {
+        font-size: 9px;
+        padding: 3px 8px;
+        border-radius: 100px;
+        font-family: var(--font-mono);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .step-badge.idle {
+        background: rgba(74, 127, 165, 0.15);
+        color: var(--text3);
+      }
+      .step-badge.running {
+        background: rgba(0, 212, 255, 0.15);
+        color: var(--accent);
+        animation: pulse 1.5s ease-in-out infinite;
+      }
+      .step-badge.done {
+        background: rgba(0, 255, 179, 0.15);
+        color: var(--accent3);
+      }
+      .step-badge.error {
+        background: rgba(255, 77, 109, 0.15);
+        color: var(--red);
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      .step-icon {
+        font-size: 28px;
+        margin-bottom: 10px;
+        display: block;
+        filter: drop-shadow(0 0 8px rgba(0, 212, 255, 0.4));
+      }
+
+      .step-title {
+        font-family: var(--font-head);
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 6px;
+      }
+
+      .step-desc {
+        font-size: 12px;
+        color: var(--text3);
+        line-height: 1.5;
+        margin-bottom: 20px;
+      }
+
+      /* ═══════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════ */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 11px 20px;
+        border-radius: var(--r2);
+        font-family: var(--font-mono);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        cursor: pointer;
+        border: none;
+        transition: var(--transition);
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .btn::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: rgba(255, 255, 255, 0);
+        transition: background 0.2s;
+      }
+
+      .btn:hover::after {
+        background: rgba(255, 255, 255, 0.05);
+      }
+      .btn:active {
+        transform: scale(0.98);
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, var(--accent2), var(--accent));
+        color: #000;
+        box-shadow: 0 4px 20px rgba(0, 212, 255, 0.25);
+      }
+
+      .btn-primary:hover {
+        box-shadow: 0 4px 30px rgba(0, 212, 255, 0.45);
+        transform: translateY(-1px);
+      }
+
+      .btn-secondary {
+        background: transparent;
+        color: var(--accent);
+        border: 1px solid var(--border2);
+      }
+
+      .btn-secondary:hover {
+        background: rgba(0, 212, 255, 0.06);
+        border-color: var(--accent);
+      }
+
+      .btn-success {
+        background: linear-gradient(135deg, #00a86b, var(--accent3));
+        color: #000;
+        box-shadow: 0 4px 20px rgba(0, 255, 179, 0.2);
+      }
+
+      .btn-success:hover {
+        box-shadow: 0 4px 30px rgba(0, 255, 179, 0.4);
+        transform: translateY(-1px);
+      }
+
+      .btn-danger {
+        background: linear-gradient(135deg, #c0002f, var(--red));
+        color: #fff;
+        box-shadow: 0 4px 20px rgba(255, 77, 109, 0.2);
+      }
+
+      .btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        transform: none !important;
+        box-shadow: none !important;
+      }
+
+      /* Upload area */
+      .upload-area {
+        border: 2px dashed var(--border2);
+        border-radius: var(--r2);
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: var(--transition);
+        margin-bottom: 12px;
+        background: rgba(0, 212, 255, 0.02);
+      }
+
+      .upload-area:hover,
+      .upload-area.dragover {
+        border-color: var(--accent);
+        background: rgba(0, 212, 255, 0.06);
+      }
+
+      .upload-area input {
+        display: none;
+      }
+      .upload-area-text {
+        font-size: 12px;
+        color: var(--text3);
+        font-family: var(--font-mono);
+      }
+      .upload-area-text strong {
+        color: var(--accent);
+        display: block;
+        font-size: 13px;
+        margin-bottom: 4px;
+      }
+      .upload-filename {
+        font-size: 11px;
+        color: var(--accent3);
+        margin-top: 6px;
+        font-family: var(--font-mono);
+      }
+
+      /* Progress bar */
+      .progress-wrap {
+        height: 3px;
+        background: var(--border);
+        border-radius: 100px;
+        overflow: hidden;
+        margin-top: 12px;
+        display: none;
+      }
+
+      .progress-wrap.show {
+        display: block;
+      }
+
+      .progress-bar {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(
+          90deg,
+          var(--accent2),
+          var(--accent),
+          var(--accent3)
+        );
+        border-radius: 100px;
+        transition: width 0.4s ease;
+        animation: shimmer 2s linear infinite;
+        background-size: 200% 100%;
+      }
+
+      @keyframes shimmer {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
+
+      /* ═══════════════════════════════════════════
+   LOG TERMINAL
+═══════════════════════════════════════════ */
+      .log-section {
+        margin-bottom: 32px;
+        animation: fadeUp 0.6s 0.5s ease both;
+      }
+
+      .terminal {
+        background: #000f1a;
+        border: 1px solid var(--border);
+        border-radius: var(--r);
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      }
+
+      .terminal-header {
+        background: var(--panel2);
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .terminal-dots {
+        display: flex;
+        gap: 6px;
+      }
+      .terminal-dots span {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+      }
+      .terminal-dots span:nth-child(1) {
+        background: #ff5f56;
+      }
+      .terminal-dots span:nth-child(2) {
+        background: #ffbd2e;
+      }
+      .terminal-dots span:nth-child(3) {
+        background: #27c93f;
+      }
+
+      .terminal-title {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--text3);
+        flex: 1;
+        text-align: center;
+      }
+
+      .terminal-status {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        color: var(--text3);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .terminal-status.live {
+        color: #27c93f;
+      }
+      .terminal-status.live::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #27c93f;
+        box-shadow: 0 0 6px #27c93f;
+        animation: blink 1s ease-in-out infinite;
+      }
+
+      .terminal-body {
+        padding: 16px 20px;
+        height: 280px;
+        overflow-y: auto;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        line-height: 1.8;
+        color: #4dff88;
+        scroll-behavior: smooth;
+      }
+
+      .terminal-body::-webkit-scrollbar {
+        width: 4px;
+      }
+      .terminal-body::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .terminal-body::-webkit-scrollbar-thumb {
+        background: var(--border2);
+        border-radius: 100px;
+      }
+
+      .log-line {
+        display: block;
+        animation: logAppear 0.15s ease both;
+        white-space: pre-wrap;
+        word-break: break-all;
+      }
+
+      @keyframes logAppear {
+        from {
+          opacity: 0;
+          transform: translateX(-4px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      .log-line.info {
+        color: #4dff88;
+      }
+      .log-line.warn {
+        color: var(--gold);
+      }
+      .log-line.error {
+        color: var(--red);
+      }
+      .log-line.system {
+        color: var(--accent);
+      }
+      .log-line.dim {
+        color: #2a5a40;
+      }
+
+      .terminal-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: var(--text3);
+        font-family: var(--font-mono);
+        font-size: 12px;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .cursor-blink {
+        display: inline-block;
+        width: 8px;
+        height: 14px;
+        background: var(--accent);
+        animation: blink 1s step-end infinite;
+        vertical-align: middle;
+        margin-left: 4px;
+      }
+
+      /* ═══════════════════════════════════════════
+   METRICS PANELS
+═══════════════════════════════════════════ */
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 32px;
+      }
+
+      .metric-card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: var(--r);
+        padding: 20px 24px;
+        position: relative;
+        overflow: hidden;
+        transition: var(--transition);
+        animation: fadeUp 0.5s ease both;
+      }
+
+      .metric-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--accent2), var(--accent));
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+
+      .metric-card.loaded::before {
+        opacity: 1;
+      }
+
+      .metric-card:hover {
+        border-color: var(--border2);
+        transform: translateY(-2px);
+        box-shadow: var(--glow2);
+      }
+
+      .metric-label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text3);
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .metric-source {
+        font-size: 9px;
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+
+      .metric-source.central {
+        background: rgba(0, 212, 255, 0.1);
+        color: var(--accent);
+      }
+      .metric-source.federated {
+        background: rgba(0, 255, 179, 0.1);
+        color: var(--accent3);
+      }
+
+      .metric-value {
+        font-family: var(--font-head);
+        font-size: 32px;
+        font-weight: 800;
+        color: var(--text);
+        line-height: 1;
+        margin-bottom: 4px;
+        transition: var(--transition);
+      }
+
+      .metric-sub {
+        font-size: 11px;
+        color: var(--text3);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .metric-change {
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: var(--font-mono);
+      }
+
+      .metric-change.up {
+        background: rgba(0, 255, 179, 0.1);
+        color: var(--accent3);
+      }
+      .metric-change.neutral {
+        background: rgba(245, 197, 66, 0.1);
+        color: var(--gold);
+      }
+
+      .metric-placeholder {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--text3);
+        opacity: 0.5;
+      }
+
+      /* ═══════════════════════════════════════════
+   FL ROUND TABLE
+═══════════════════════════════════════════ */
+      .rounds-table-wrap {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: var(--r);
+        overflow: hidden;
+        margin-bottom: 32px;
+      }
+
+      .rounds-table-header {
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .rounds-table-header h3 {
+        font-family: var(--font-head);
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text3);
+        padding: 12px 20px;
+        text-align: left;
+        background: var(--bg3);
+        border-bottom: 1px solid var(--border);
+      }
+
+      td {
+        padding: 12px 20px;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--text);
+        border-bottom: 1px solid rgba(14, 52, 96, 0.5);
+        transition: var(--transition);
+      }
+
+      tr:last-child td {
+        border-bottom: none;
+      }
+
+      tr:hover td {
+        background: rgba(0, 212, 255, 0.03);
+        color: var(--text);
+      }
+
+      .auc-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .auc-track {
+        flex: 1;
+        height: 4px;
+        background: var(--border);
+        border-radius: 100px;
+        overflow: hidden;
+      }
+
+      .auc-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent2), var(--accent3));
+        border-radius: 100px;
+        transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* ═══════════════════════════════════════════
+   CHARTS
+═══════════════════════════════════════════ */
+      .charts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+        gap: 20px;
+        margin-bottom: 32px;
+      }
+
+      .chart-card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: var(--r);
+        overflow: hidden;
+        transition: var(--transition);
+        animation: fadeUp 0.5s ease both;
+      }
+
+      .chart-card:hover {
+        border-color: var(--border2);
+        box-shadow: var(--glow2);
+      }
+
+      .chart-header {
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .chart-title {
+        font-family: var(--font-head);
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text);
+      }
+
+      .chart-tag {
+        font-family: var(--font-mono);
+        font-size: 9px;
+        padding: 3px 8px;
+        border-radius: 4px;
+        background: rgba(0, 212, 255, 0.1);
+        color: var(--accent);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .chart-body {
+        padding: 16px;
+        min-height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .chart-body img {
+        max-width: 100%;
+        border-radius: 6px;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+      }
+
+      .chart-body img.loaded {
+        opacity: 1;
+      }
+
+      .chart-placeholder {
+        color: var(--text3);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-align: center;
+      }
+
+      .chart-placeholder .icon {
+        font-size: 28px;
+        display: block;
+        margin-bottom: 8px;
+        opacity: 0.4;
+      }
+
+      /* ═══════════════════════════════════════════
+   PERFORMANCE BAR SECTION
+═══════════════════════════════════════════ */
+      .perf-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+        margin-bottom: 32px;
+      }
+
+      .perf-card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: var(--r);
+        padding: 20px;
+        transition: var(--transition);
+      }
+
+      .perf-card:hover {
+        border-color: var(--border2);
+        transform: translateY(-2px);
+      }
+
+      .perf-icon {
+        font-size: 20px;
+        margin-bottom: 10px;
+      }
+      .perf-label {
+        font-size: 11px;
+        color: var(--text3);
+        font-family: var(--font-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 6px;
+      }
+      .perf-val {
+        font-family: var(--font-head);
+        font-size: 22px;
+        font-weight: 800;
+        color: var(--text);
+      }
+      .perf-unit {
+        font-size: 12px;
+        color: var(--text3);
+        font-weight: 400;
+      }
+
+      /* ═══════════════════════════════════════════
+   TOAST NOTIFICATIONS
+═══════════════════════════════════════════ */
+      .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .toast {
+        background: var(--panel2);
+        border: 1px solid var(--border);
+        border-radius: var(--r2);
+        padding: 14px 18px;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--text);
+        max-width: 320px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        animation: toastIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      }
+
+      .toast.success {
+        border-color: rgba(0, 255, 179, 0.3);
+        background: rgba(0, 255, 179, 0.05);
+      }
+      .toast.error {
+        border-color: rgba(255, 77, 109, 0.3);
+        background: rgba(255, 77, 109, 0.05);
+      }
+      .toast.info {
+        border-color: rgba(0, 212, 255, 0.3);
+        background: rgba(0, 212, 255, 0.05);
+      }
+
+      @keyframes toastIn {
+        from {
+          opacity: 0;
+          transform: translateX(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      @keyframes toastOut {
+        from {
+          opacity: 1;
+          transform: translateX(0);
+        }
+        to {
+          opacity: 0;
+          transform: translateX(20px);
+        }
+      }
+
+      /* ═══════════════════════════════════════════
+   DIVIDER
+═══════════════════════════════════════════ */
+      .divider {
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--border),
+          transparent
+        );
+        margin: 32px 0;
+      }
+
+      /* ═══════════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════════ */
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes spin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .spinner {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border: 2px solid rgba(0, 0, 0, 0.2);
+        border-top-color: rgba(0, 0, 0, 0.8);
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+      }
+
+      /* ═══════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════ */
+      footer {
+        text-align: center;
+        padding: 24px;
+        border-top: 1px solid var(--border);
+        font-family: var(--font-mono);
+        font-size: 10px;
+        color: var(--text3);
+        letter-spacing: 0.08em;
+      }
+
+      /* ═══════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════ */
+      @media (max-width: 640px) {
+        .pipeline {
+          grid-template-columns: 1fr;
+        }
+        .metrics-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+        .charts-grid {
+          grid-template-columns: 1fr;
+        }
+        .status-bar {
+          flex-wrap: wrap;
+          gap: 12px;
+          border-radius: var(--r);
+        }
+      }
+
+      /* ═══════════════════════════════════════════
+   SCROLLBAR GLOBAL
+═══════════════════════════════════════════ */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: var(--bg);
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--border2);
+        border-radius: 100px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--accent2);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="container">
+      <!-- ═══ HEADER ═══ -->
+      <header>
+        <div class="logo-badge">
+          <span class="dot"></span> FedShield Platform v1.0
+        </div>
+        <h1>Federated Fraud<br />Detection</h1>
+        <p class="subtitle">
+          Privacy-preserving ML · 3-Client FedAvg · Secure Aggregation · X25519
+          ECDH
+        </p>
+        <div class="status-bar">
+          <div class="status-item" id="st-dataset">
+            <span class="status-dot"></span>Dataset
+          </div>
+          <div class="status-item" id="st-processed">
+            <span class="status-dot"></span>Processed
+          </div>
+          <div class="status-item" id="st-baseline">
+            <span class="status-dot"></span>Baseline
+          </div>
+          <div class="status-item" id="st-federated">
+            <span class="status-dot"></span>Federated
+          </div>
+          <div class="status-item" id="st-plots">
+            <span class="status-dot"></span>Results
+          </div>
+        </div>
+      </header>
+
+      <!-- ═══ PIPELINE ═══ -->
+      <div class="section-title">Pipeline Steps</div>
+      <div class="pipeline">
+        <!-- Step 1: Upload -->
+        <div class="step-card" id="card-upload">
+          <div class="step-number">
+            STEP 01 <span class="step-badge idle" id="badge-upload">Idle</span>
+          </div>
+          <span class="step-icon">📁</span>
+          <div class="step-title">Upload Dataset</div>
+          <div class="step-desc">
+            Upload creditcard.csv from Kaggle. This is the raw transaction data
+            (284,807 rows).
+          </div>
+          <div
+            class="upload-area"
+            id="uploadArea"
+            onclick="document.getElementById('fileInput').click()"
+          >
+            <input
+              type="file"
+              id="fileInput"
+              accept=".csv"
+              onchange="handleFileSelect(event)"
+            />
+            <div class="upload-area-text">
+              <strong>Click to upload</strong>
+              or drag & drop
+            </div>
+            <div class="upload-filename" id="uploadFilename"></div>
+          </div>
+          <button
+            class="btn btn-primary"
+            id="btn-upload"
+            onclick="uploadDataset()"
+            disabled
+          >
+            <span
+              class="spinner"
+              id="spinner-upload"
+              style="display: none"
+            ></span>
+            Upload Dataset
+          </button>
+          <div class="progress-wrap" id="prog-upload">
+            <div class="progress-bar" id="progbar-upload"></div>
+          </div>
+        </div>
+
+        <!-- Step 2: Preprocess -->
+        <div class="step-card" id="card-preprocess">
+          <div class="step-number">
+            STEP 02
+            <span class="step-badge idle" id="badge-preprocess">Idle</span>
+          </div>
+          <span class="step-icon">⚙️</span>
+          <div class="step-title">Preprocess Data</div>
+          <div class="step-desc">
+            Split into 80/20 train/test, z-score normalise, partition into 3
+            client shards.
+          </div>
+          <button
+            class="btn btn-primary"
+            id="btn-preprocess"
+            onclick="runStep('preprocess')"
+            disabled
+          >
+            <span
+              class="spinner"
+              id="spinner-preprocess"
+              style="display: none"
+            ></span>
+            Run Preprocessing
+          </button>
+          <div class="progress-wrap" id="prog-preprocess">
+            <div class="progress-bar" id="progbar-preprocess"></div>
+          </div>
+        </div>
+
+        <!-- Step 3: Baseline -->
+        <div class="step-card" id="card-baseline">
+          <div class="step-number">
+            STEP 03
+            <span class="step-badge idle" id="badge-baseline">Idle</span>
+          </div>
+          <span class="step-icon">🎯</span>
+          <div class="step-title">Train Baseline</div>
+          <div class="step-desc">
+            Train centralized logistic regression on full dataset. Pure Python,
+            no sklearn.
+          </div>
+          <button
+            class="btn btn-primary"
+            id="btn-baseline"
+            onclick="runStep('train_baseline')"
+            disabled
+          >
+            <span
+              class="spinner"
+              id="spinner-baseline"
+              style="display: none"
+            ></span>
+            Train Baseline Model
+          </button>
+          <div class="progress-wrap" id="prog-baseline">
+            <div class="progress-bar" id="progbar-baseline"></div>
+          </div>
+        </div>
+
+        <!-- Step 4: Federated -->
+        <div class="step-card" id="card-federated">
+          <div class="step-number">
+            STEP 04
+            <span class="step-badge idle" id="badge-federated">Idle</span>
+          </div>
+          <span class="step-icon">🚀</span>
+          <div class="step-title">Run Federated Demo</div>
+          <div class="step-desc">
+            Launch Docker: 1 server + 3 clients. FedAvg over 5 rounds with
+            Secure Aggregation.
+          </div>
+          <button
+            class="btn btn-success"
+            id="btn-federated"
+            onclick="runStep('run_federated')"
+            disabled
+          >
+            <span
+              class="spinner"
+              id="spinner-federated"
+              style="display: none"
+            ></span>
+            Launch FL Demo
+          </button>
+          <div class="progress-wrap" id="prog-federated">
+            <div class="progress-bar" id="progbar-federated"></div>
+          </div>
+        </div>
+
+        <!-- Step 5: Plots -->
+        <div class="step-card" id="card-plots">
+          <div class="step-number">
+            STEP 05 <span class="step-badge idle" id="badge-plots">Idle</span>
+          </div>
+          <span class="step-icon">📊</span>
+          <div class="step-title">Generate Results</div>
+          <div class="step-desc">
+            Generate convergence, performance, and comparison plots. View
+            metrics below.
+          </div>
+          <button
+            class="btn btn-secondary"
+            id="btn-plots"
+            onclick="runStep('generate_plots')"
+            disabled
+          >
+            <span
+              class="spinner"
+              id="spinner-plots"
+              style="display: none"
+            ></span>
+            Generate Plots
+          </button>
+          <div class="progress-wrap" id="prog-plots">
+            <div class="progress-bar" id="progbar-plots"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ TERMINAL ═══ -->
+      <div class="section-title">Live Console</div>
+      <div class="log-section">
+        <div class="terminal">
+          <div class="terminal-header">
+            <div class="terminal-dots">
+              <span></span><span></span><span></span>
+            </div>
+            <div class="terminal-title" id="termTitle">fedshield — bash</div>
+            <div class="terminal-status" id="termStatus">idle</div>
+          </div>
+          <div class="terminal-body" id="termBody">
+            <div class="terminal-placeholder">
+              <span>Waiting for command...</span>
+              <span style="color: var(--text3); font-size: 10px"
+                >Run a pipeline step to see live output here</span
+              >
+              <span class="cursor-blink"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- ═══ METRICS ═══ -->
+      <div class="section-title">Model Metrics</div>
+      <div class="metrics-grid">
+        <div class="metric-card" id="mc-auc-central">
+          <div class="metric-label">
+            AUC Score <span class="metric-source central">Centralized</span>
+          </div>
+          <div class="metric-value" id="mv-auc-central">
+            <span class="metric-placeholder">—</span>
+          </div>
+          <div class="metric-sub">Area under ROC curve</div>
+        </div>
+        <div class="metric-card" id="mc-prec-central">
+          <div class="metric-label">
+            Precision <span class="metric-source central">Centralized</span>
+          </div>
+          <div class="metric-value" id="mv-prec-central">
+            <span class="metric-placeholder">—</span>
+          </div>
+          <div class="metric-sub">True positive rate</div>
+        </div>
+        <div class="metric-card" id="mc-auc-fl">
+          <div class="metric-label">
+            AUC Score <span class="metric-source federated">Federated</span>
+          </div>
+          <div class="metric-value" id="mv-auc-fl">
+            <span class="metric-placeholder">—</span>
+          </div>
+          <div class="metric-sub" id="ms-auc-fl">Final round</div>
+        </div>
+        <div class="metric-card" id="mc-prec-fl">
+          <div class="metric-label">
+            Precision <span class="metric-source federated">Federated</span>
+          </div>
+          <div class="metric-value" id="mv-prec-fl">
+            <span class="metric-placeholder">—</span>
+          </div>
+          <div class="metric-sub" id="ms-prec-fl">Final round</div>
+        </div>
+      </div>
+
+      <!-- ═══ FL ROUNDS TABLE ═══ -->
+      <div class="rounds-table-wrap" id="roundsSection" style="display: none">
+        <div class="rounds-table-header">
+          <h3>Federated Learning — Round Progress</h3>
+          <span class="chart-tag">5 Rounds · 3 Clients · SecAgg</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Round</th>
+              <th>AUC</th>
+              <th>Precision</th>
+              <th>Progress</th>
+            </tr>
+          </thead>
+          <tbody id="roundsBody"></tbody>
+        </table>
+      </div>
+
+      <!-- ═══ PERFORMANCE ═══ -->
+      <div class="section-title" id="perfSection" style="display: none">
+        Performance
+      </div>
+      <div class="perf-grid" id="perfGrid" style="display: none">
+        <div class="perf-card">
+          <div class="perf-icon">⏱️</div>
+          <div class="perf-label">Avg Round Latency</div>
+          <div class="perf-val">
+            <span id="perf-latency">—</span> <span class="perf-unit">sec</span>
+          </div>
+        </div>
+        <div class="perf-card">
+          <div class="perf-icon">🔒</div>
+          <div class="perf-label">Total Masked Bytes</div>
+          <div class="perf-val">
+            <span id="perf-bytes">—</span> <span class="perf-unit">bytes</span>
+          </div>
+        </div>
+        <div class="perf-card">
+          <div class="perf-icon">📡</div>
+          <div class="perf-label">Avg Upload / Client</div>
+          <div class="perf-val">
+            <span id="perf-upload">—</span> <span class="perf-unit">bytes</span>
+          </div>
+        </div>
+        <div class="perf-card">
+          <div class="perf-icon">🖥️</div>
+          <div class="perf-label">Avg Server CPU</div>
+          <div class="perf-val">
+            <span id="perf-cpu">—</span> <span class="perf-unit">sec</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ CHARTS ═══ -->
+      <div class="section-title" id="chartsTitle" style="display: none">
+        Output Charts
+      </div>
+      <div class="charts-grid" id="chartsGrid" style="display: none">
+        <div class="chart-card">
+          <div class="chart-header">
+            <span class="chart-title">FL Convergence</span>
+            <span class="chart-tag">AUC · Precision</span>
+          </div>
+          <div class="chart-body">
+            <img
+              id="chart-convergence"
+              src=""
+              alt="Convergence plot"
+              onload="this.classList.add('loaded')"
+            />
+            <div class="chart-placeholder" id="ph-convergence">
+              <span class="icon">📈</span>Generate plots to view
+            </div>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <span class="chart-title">Performance</span>
+            <span class="chart-tag">Latency · Bytes</span>
+          </div>
+          <div class="chart-body">
+            <img
+              id="chart-performance"
+              src=""
+              alt="Performance plot"
+              onload="this.classList.add('loaded')"
+            />
+            <div class="chart-placeholder" id="ph-performance">
+              <span class="icon">⚡</span>Generate plots to view
+            </div>
+          </div>
+        </div>
+        <div class="chart-card" style="grid-column: 1/-1">
+          <div class="chart-header">
+            <span class="chart-title">Centralized vs Federated</span>
+            <span class="chart-tag">Accuracy Comparison</span>
+          </div>
+          <div class="chart-body" style="min-height: 260px">
+            <img
+              id="chart-comparison"
+              src=""
+              alt="Comparison plot"
+              onload="this.classList.add('loaded')"
+            />
+            <div class="chart-placeholder" id="ph-comparison">
+              <span class="icon">⚖️</span>Generate plots to view
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      FedShield · Federated Fraud Detection Platform · Built with Flask +
+      Vanilla JS · Secure Aggregation via X25519 ECDH
+    </footer>
+
+    <!-- ═══════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════ -->
+    <script>
+      // ─── STATE ────────────────────────────────────────────────────────
+      let selectedFile = null;
+      let activeEventSource = null;
+
+      // ─── INIT ─────────────────────────────────────────────────────────
+      document.addEventListener("DOMContentLoaded", () => {
+        checkStatus();
+        setupDragDrop();
+      });
+
+      // ─── STATUS CHECK ─────────────────────────────────────────────────
+      async function checkStatus() {
+        try {
+          const res = await fetch("/api/status");
+          const s = await res.json();
+
+          setStatusIndicator("st-dataset", s.dataset_exists);
+          setStatusIndicator("st-processed", s.processed_exists);
+          setStatusIndicator("st-baseline", s.baseline_exists);
+          setStatusIndicator("st-federated", s.fl_exists);
+          setStatusIndicator("st-plots", s.plots_exist);
+
+          // Enable buttons based on what already exists
+          if (s.dataset_exists) {
+            document.getElementById("btn-preprocess").disabled = false;
+            setCardDone("card-upload", "badge-upload");
+            document.getElementById("uploadFilename").textContent =
+              "✓ creditcard.csv already uploaded";
+          }
+          if (s.processed_exists) {
+            document.getElementById("btn-baseline").disabled = false;
+            setCardDone("card-preprocess", "badge-preprocess");
+          }
+          if (s.baseline_exists) {
+            document.getElementById("btn-federated").disabled = false;
+            setCardDone("card-baseline", "badge-baseline");
+            loadBaselineMetrics();
+          }
+          if (s.fl_exists) {
+            document.getElementById("btn-plots").disabled = false;
+            setCardDone("card-federated", "badge-federated");
+            loadFederatedMetrics();
+          }
+          if (s.plots_exist) {
+            setCardDone("card-plots", "badge-plots");
+            loadPlots();
+            loadPerformanceMetrics();
+          }
+        } catch (e) {
+          showToast(
+            "Cannot connect to Flask server. Is app.py running?",
+            "error"
+          );
+        }
+      }
+
+      function setStatusIndicator(id, active) {
+        const el = document.getElementById(id);
+        if (active) el.classList.add("active");
+        else el.classList.remove("active");
+      }
+
+      function setCardDone(cardId, badgeId) {
+        document.getElementById(cardId).classList.add("completed");
+        const badge = document.getElementById(badgeId);
+        badge.textContent = "Done";
+        badge.className = "step-badge done";
+      }
+
+      function setCardRunning(cardId, badgeId) {
+        const card = document.getElementById(cardId);
+        card.classList.remove("completed", "error");
+        card.classList.add("running");
+        const badge = document.getElementById(badgeId);
+        badge.textContent = "Running";
+        badge.className = "step-badge running";
+      }
+
+      function setCardError(cardId, badgeId) {
+        document.getElementById(cardId).classList.remove("running");
+        document.getElementById(cardId).classList.add("error");
+        const badge = document.getElementById(badgeId);
+        badge.textContent = "Error";
+        badge.className = "step-badge error";
+      }
+
+      // ─── FILE UPLOAD ──────────────────────────────────────────────────
+      function setupDragDrop() {
+        const area = document.getElementById("uploadArea");
+        area.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          area.classList.add("dragover");
+        });
+        area.addEventListener("dragleave", () =>
+          area.classList.remove("dragover")
+        );
+        area.addEventListener("drop", (e) => {
+          e.preventDefault();
+          area.classList.remove("dragover");
+          const file = e.dataTransfer.files[0];
+          if (file) setFile(file);
+        });
+      }
+
+      function handleFileSelect(e) {
+        const file = e.target.files[0];
+        if (file) setFile(file);
+      }
+
+      function setFile(file) {
+        if (!file.name.endsWith(".csv")) {
+          showToast("Please select a .csv file", "error");
+          return;
+        }
+        selectedFile = file;
+        document.getElementById("uploadFilename").textContent = `📄 ${
+          file.name
+        } (${(file.size / 1024 / 1024).toFixed(1)} MB)`;
+        document.getElementById("btn-upload").disabled = false;
+      }
+
+      async function uploadDataset() {
+        if (!selectedFile) return;
+        const btn = document.getElementById("btn-upload");
+        const spinner = document.getElementById("spinner-upload");
+        const prog = document.getElementById("prog-upload");
+        const bar = document.getElementById("progbar-upload");
+
+        btn.disabled = true;
+        spinner.style.display = "inline-block";
+        prog.classList.add("show");
+
+        // Animate progress
+        let p = 0;
+        const interval = setInterval(() => {
+          p = Math.min(p + Math.random() * 15, 85);
+          bar.style.width = p + "%";
+        }, 200);
+
+        const formData = new FormData();
+        formData.append("file", selectedFile);
+
+        try {
+          const res = await fetch("/api/upload", {
+            method: "POST",
+            body: formData,
+          });
+          const data = await res.json();
+          clearInterval(interval);
+          bar.style.width = "100%";
+
+          if (data.status === "ok") {
+            showToast(`✓ ${data.message}`, "success");
+            setCardDone("card-upload", "badge-upload");
+            setStatusIndicator("st-dataset", true);
+            document.getElementById("btn-preprocess").disabled = false;
+            logLine(`[Upload] Dataset saved — ${data.size_mb} MB`, "system");
+          } else {
+            showToast(data.message, "error");
+            setCardError("card-upload", "badge-upload");
+          }
+        } catch (e) {
+          clearInterval(interval);
+          showToast("Upload failed: " + e.message, "error");
+          setCardError("card-upload", "badge-upload");
+        } finally {
+          spinner.style.display = "none";
+          btn.disabled = false;
+          setTimeout(() => {
+            prog.classList.remove("show");
+            bar.style.width = "0%";
+          }, 2000);
+        }
+      }
+
+      // ─── RUN STEP ─────────────────────────────────────────────────────
+      const stepConfig = {
+        preprocess: {
+          card: "card-preprocess",
+          badge: "badge-preprocess",
+          btn: "btn-preprocess",
+          spinner: "spinner-preprocess",
+          prog: "prog-preprocess",
+          bar: "progbar-preprocess",
+          title: "Preprocessing Data",
+        },
+        train_baseline: {
+          card: "card-baseline",
+          badge: "badge-baseline",
+          btn: "btn-baseline",
+          spinner: "spinner-baseline",
+          prog: "prog-baseline",
+          bar: "progbar-baseline",
+          title: "Training Baseline",
+        },
+        run_federated: {
+          card: "card-federated",
+          badge: "badge-federated",
+          btn: "btn-federated",
+          spinner: "spinner-federated",
+          prog: "prog-federated",
+          bar: "progbar-federated",
+          title: "Federated Demo",
+        },
+        generate_plots: {
+          card: "card-plots",
+          badge: "badge-plots",
+          btn: "btn-plots",
+          spinner: "spinner-plots",
+          prog: "prog-plots",
+          bar: "progbar-plots",
+          title: "Generating Plots",
+        },
+      };
+
+      async function runStep(step) {
+        const cfg = stepConfig[step];
+        const btn = document.getElementById(cfg.btn);
+        const spinner = document.getElementById(cfg.spinner);
+        const prog = document.getElementById(cfg.prog);
+        const bar = document.getElementById(cfg.bar);
+
+        btn.disabled = true;
+        spinner.style.display = "inline-block";
+        prog.classList.add("show");
+        setCardRunning(cfg.card, cfg.badge);
+        clearTerminal();
+        setTerminalStatus(true, cfg.title);
+
+        // Animate indeterminate progress
+        let p = 0;
+        let dir = 1;
+        const interval = setInterval(() => {
+          p += dir * (Math.random() * 3 + 1);
+          if (p >= 90) dir = -0.2;
+          if (p <= 10) dir = 1;
+          bar.style.width = Math.max(5, Math.min(90, p)) + "%";
+        }, 300);
+
+        try {
+          const res = await fetch(`/api/${step}`, { method: "POST" });
+          const data = await res.json();
+
+          if (data.status !== "started") {
+            throw new Error("Failed to start task");
+          }
+
+          // Stream logs via SSE
+          await streamLogs(data.task_id, (status) => {
+            clearInterval(interval);
+            bar.style.width = "100%";
+            spinner.style.display = "none";
+            setTerminalStatus(false, cfg.title);
+
+            if (status === "done") {
+              setCardDone(cfg.card, cfg.badge);
+              onStepComplete(step);
+              showToast(`✓ ${cfg.title} complete!`, "success");
+            } else {
+              setCardError(cfg.card, cfg.badge);
+              showToast(`${cfg.title} encountered an error`, "error");
+              btn.disabled = false;
+            }
+            setTimeout(() => {
+              prog.classList.remove("show");
+              bar.style.width = "0%";
+            }, 2000);
+          });
+        } catch (e) {
+          clearInterval(interval);
+          spinner.style.display = "none";
+          btn.disabled = false;
+          setCardError(cfg.card, cfg.badge);
+          setTerminalStatus(false);
+          showToast("Error: " + e.message, "error");
+          bar.style.width = "0%";
+          prog.classList.remove("show");
+        }
+      }
+
+      function streamLogs(taskId, onComplete) {
+        return new Promise((resolve) => {
+          if (activeEventSource) activeEventSource.close();
+          const es = new EventSource(`/api/logs/${taskId}`);
+          activeEventSource = es;
+
+          es.onmessage = (e) => {
+            const msg = e.data;
+            if (msg === "__DONE__") {
+              es.close();
+              // Check final status
+              fetch(`/api/task_status/${taskId}`)
+                .then((r) => r.json())
+                .then((d) => {
+                  onComplete(d.status);
+                  resolve();
+                });
+              return;
+            }
+            if (msg === "[ping]") return;
+            logLine(msg);
+          };
+
+          es.onerror = () => {
+            es.close();
+            onComplete("error");
+            resolve();
+          };
+        });
+      }
+
+      // ─── AFTER STEP COMPLETE ──────────────────────────────────────────
+      function onStepComplete(step) {
+        if (step === "preprocess") {
+          document.getElementById("btn-baseline").disabled = false;
+          setStatusIndicator("st-processed", true);
+        }
+        if (step === "train_baseline") {
+          document.getElementById("btn-federated").disabled = false;
+          setStatusIndicator("st-baseline", true);
+          loadBaselineMetrics();
+        }
+        if (step === "run_federated") {
+          document.getElementById("btn-plots").disabled = false;
+          setStatusIndicator("st-federated", true);
+          loadFederatedMetrics();
+        }
+        if (step === "generate_plots") {
+          setStatusIndicator("st-plots", true);
+          loadPlots();
+          loadPerformanceMetrics();
+        }
+      }
+
+      // ─── LOAD METRICS ─────────────────────────────────────────────────
+      async function loadBaselineMetrics() {
+        try {
+          const res = await fetch("/api/metrics/baseline");
+          const d = await res.json();
+          if (d.error) return;
+          animateMetric("mv-auc-central", d.AUC, 4);
+          animateMetric("mv-prec-central", d.Precision, 4);
+          document.getElementById("mc-auc-central").classList.add("loaded");
+          document.getElementById("mc-prec-central").classList.add("loaded");
+        } catch (e) {}
+      }
+
+      async function loadFederatedMetrics() {
+        try {
+          const res = await fetch("/api/metrics/federated");
+          const d = await res.json();
+          if (d.error || !d.rounds.length) return;
+
+          const lastAuc = d.aucs[d.aucs.length - 1];
+          const lastPrec = d.precisions[d.precisions.length - 1];
+          animateMetric("mv-auc-fl", lastAuc, 4);
+          animateMetric("mv-prec-fl", lastPrec, 4);
+          document.getElementById("ms-auc-fl").textContent = `Round ${
+            d.rounds[d.rounds.length - 1]
+          } of ${d.rounds.length}`;
+          document.getElementById("ms-prec-fl").textContent = `Round ${
+            d.rounds[d.rounds.length - 1]
+          } of ${d.rounds.length}`;
+          document.getElementById("mc-auc-fl").classList.add("loaded");
+          document.getElementById("mc-prec-fl").classList.add("loaded");
+
+          // Rounds table
+          const tbody = document.getElementById("roundsBody");
+          tbody.innerHTML = "";
+          d.rounds.forEach((r, i) => {
+            const auc = d.aucs[i];
+            const prec = d.precisions[i];
+            const row = document.createElement("tr");
+            row.style.animationDelay = i * 0.08 + "s";
+            row.innerHTML = `
+        <td><strong>${r}</strong></td>
+        <td>${auc.toFixed(6)}</td>
+        <td>${prec.toFixed(6)}</td>
+        <td>
+          <div class="auc-bar">
+            <div class="auc-track"><div class="auc-fill" style="width:${(
+              auc * 100
+            ).toFixed(1)}%"></div></div>
+            <span style="font-size:10px;color:var(--accent)">${(
+              auc * 100
+            ).toFixed(2)}%</span>
+          </div>
+        </td>
+      `;
+            tbody.appendChild(row);
+          });
+          document.getElementById("roundsSection").style.display = "block";
+        } catch (e) {}
+      }
+
+      async function loadPerformanceMetrics() {
+        try {
+          const res = await fetch("/api/metrics/performance");
+          const d = await res.json();
+          if (d.error) return;
+          document.getElementById("perf-latency").textContent = parseFloat(
+            d.avg_round_latency_s
+          ).toFixed(2);
+          document.getElementById("perf-bytes").textContent =
+            d.total_masked_bytes;
+          document.getElementById("perf-upload").textContent =
+            d.avg_upload_bytes_per_client;
+          document.getElementById("perf-cpu").textContent = parseFloat(
+            d.avg_server_cpu_time_s
+          ).toFixed(2);
+          document.getElementById("perfSection").style.display = "flex";
+          document.getElementById("perfGrid").style.display = "grid";
+        } catch (e) {}
+      }
+
+      // ─── LOAD PLOTS ───────────────────────────────────────────────────
+      async function loadPlots() {
+        document.getElementById("chartsTitle").style.display = "flex";
+        document.getElementById("chartsGrid").style.display = "grid";
+
+        const plots = [
+          {
+            id: "chart-convergence",
+            name: "convergence",
+            ph: "ph-convergence",
+          },
+          {
+            id: "chart-performance",
+            name: "performance",
+            ph: "ph-performance",
+          },
+          {
+            id: "chart-comparison",
+            name: "centralized_vs_fl",
+            ph: "ph-comparison",
+          },
+        ];
+
+        plots.forEach(({ id, name, ph }) => {
+          const img = document.getElementById(id);
+          const placeholder = document.getElementById(ph);
+          const ts = Date.now();
+          img.src = `/api/plot/${name}?t=${ts}`;
+          img.onload = () => {
+            placeholder.style.display = "none";
+          };
+          img.onerror = () => {
+            img.style.display = "none";
+          };
+        });
+      }
+
+      // ─── TERMINAL HELPERS ─────────────────────────────────────────────
+      function clearTerminal() {
+        const body = document.getElementById("termBody");
+        body.innerHTML = "";
+      }
+
+      function logLine(text, type = "auto") {
+        const body = document.getElementById("termBody");
+
+        // Auto-detect type from text
+        if (type === "auto") {
+          if (
+            text.includes("[ERROR]") ||
+            text.includes("Error") ||
+            text.includes("error")
+          )
+            type = "error";
+          else if (text.includes("[FedShield]") || text.includes("[Upload]"))
+            type = "system";
+          else if (text.includes("WARNING") || text.includes("warning"))
+            type = "warn";
+          else if (
+            text.includes("Epoch") ||
+            text.includes("Round") ||
+            text.includes("avg_loss")
+          )
+            type = "info";
+          else type = "dim";
+        }
+
+        const span = document.createElement("span");
+        span.className = `log-line ${type}`;
+        span.textContent = text;
+        body.appendChild(span);
+        body.scrollTop = body.scrollHeight;
+      }
+
+      function setTerminalStatus(live, title = "") {
+        const status = document.getElementById("termStatus");
+        const termTitle = document.getElementById("termTitle");
+        if (live) {
+          status.textContent = "live";
+          status.className = "terminal-status live";
+          termTitle.textContent = `fedshield — ${title.toLowerCase()}`;
+        } else {
+          status.textContent = "idle";
+          status.className = "terminal-status";
+          termTitle.textContent = "fedshield — bash";
+        }
+      }
+
+      // ─── METRIC ANIMATION ─────────────────────────────────────────────
+      function animateMetric(id, target, decimals = 2) {
+        const el = document.getElementById(id);
+        const start = 0;
+        const duration = 800;
+        const startTime = performance.now();
+
+        const tick = (now) => {
+          const elapsed = now - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          const val = start + (target - start) * eased;
+          el.textContent = val.toFixed(decimals);
+          if (progress < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      }
+
+      // ─── TOAST ────────────────────────────────────────────────────────
+      function showToast(message, type = "info") {
+        const container = document.getElementById("toastContainer");
+        const icons = { success: "✓", error: "✕", info: "ℹ" };
+        const toast = document.createElement("div");
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `<span>${
+          icons[type] || "•"
+        }</span><span>${message}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => {
+          toast.style.animation = "toastOut 0.3s ease forwards";
+          setTimeout(() => toast.remove(), 300);
+        }, 4000);
+      }
+    </script>
+  </body>
+</html>
